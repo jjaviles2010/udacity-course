@@ -57,7 +57,7 @@ class CategoryRoute extends StatelessWidget {
       ));
     }
 
-    // TODO: Create a list view of the Categories
+    // COMPLETED: Create a list view of the Categories
     final listView = Container(
       color: _backgroundColor,
       padding: EdgeInsets.symmetric(horizontal: 8.0),
