@@ -74,8 +74,8 @@ class CategoryTile extends StatelessWidget {
           splashColor: category.color['splash'],
           // We can use either the () => function() or the () { function(); }
           // syntax.
-          // TODO: This should call the onTap() passed into the constructor
-          onTap: () => _navigateToConverter(context),
+          // COMPLETED: This should call the onTap() passed into the constructor
+          onTap: () => this.onTap(category),
           child: Padding(
             padding: EdgeInsets.all(8.0),
             child: Row(
