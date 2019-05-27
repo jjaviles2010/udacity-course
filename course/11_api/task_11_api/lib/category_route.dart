@@ -7,12 +7,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-// TODO: Import necessary package
+// COMPLETED: Import necessary package
 import 'backdrop.dart';
 import 'category.dart';
 import 'category_tile.dart';
 import 'unit.dart';
 import 'unit_converter.dart';
+import 'api.dart';
 
 /// Loads in unit conversion data, and displays the data.
 ///
@@ -92,7 +93,8 @@ class _CategoryRouteState extends State<CategoryRoute> {
     // We only want to load our data in once
     if (_categories.isEmpty) {
       await _retrieveLocalCategories();
-      // TODO: Call _retrieveApiCategory() here
+      // COMPLETED: Call _retrieveApiCategory() here
+      await _retrieveApiCategory();
     }
   }
 
@@ -100,8 +102,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
   Future<void> _retrieveLocalCategories() async {
     // Consider omitting the types for local variables. For more details on Effective
     // Dart Usage, see https://www.dartlang.org/guides/language/effective-dart/usage
-    final json = DefaultAssetBundle
-        .of(context)
+    final json = DefaultAssetBundle.of(context)
         .loadString('assets/data/regular_units.json');
     final data = JsonDecoder().convert(await json);
     if (data is! Map) {
@@ -128,9 +129,35 @@ class _CategoryRouteState extends State<CategoryRoute> {
     });
   }
 
-  // TODO: Add the Currency Category retrieved from the API, to our _categories
+  // COMPLETED: Add the Currency Category retrieved from the API, to our _categories
   /// Retrieves a [Category] and its [Unit]s from an API on the web
-  Future<void> _retrieveApiCategory() async {}
+  Future<void> _retrieveApiCategory() async {
+    setState(() {
+      _categories.add(Category(
+          name: apiCategory['name'],
+          color: _baseColors.last,
+          units: [],
+          iconLocation: _icons.last));
+    });
+
+    final api = Api();
+    final jsonUnits = await api.getUnits(apiCategory['route']);
+    if (jsonUnits != null) {
+      final units = <Unit>[];
+      for (var unit in jsonUnits) {
+        units.add(Unit.fromJson(unit));
+      }
+
+      setState(() {
+        _categories.removeLast();
+        _categories.add(Category(
+            name: apiCategory['name'],
+            color: _baseColors.last,
+            units: units,
+            iconLocation: _icons.last));
+      });
+    }
+  }
 
   /// Function to call when a [Category] is tapped.
   void _onCategoryTap(Category category) {

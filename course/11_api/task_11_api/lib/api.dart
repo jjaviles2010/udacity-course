@@ -2,7 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO: Import relevant packages
+// COMPLETED: Import relevant packages
+import 'dart:io';
+import 'dart:async';
+import 'dart:convert' show json, utf8;
+
+const apiCategory = {
+  'name': 'Currency',
+  'route': 'currency',
+};
 
 /// The REST API retrieves unit conversions for [Categories] that change.
 ///
@@ -14,9 +22,12 @@
 ///   GET /currency/convert: get conversion from one currency amount to another
 class Api {
 
-  // TODO: Add any relevant variables and helper functions
+  // COMPLETED: Add any relevant variables and helper functions
+  final HttpClient _httpClient = HttpClient();
+  final String _url = 'flutter.udacity.com';
 
-  // TODO: Create getUnits()
+
+  // COMPLETED: Create getUnits()
   /// Gets all the units and conversion rates for a given category.
   ///
   /// The `category` parameter is the name of the [Category] from which to
@@ -24,9 +35,52 @@ class Api {
   ///
   /// Returns a list. Returns null on error.
 
-  // TODO: Create convert()
+  Future<List> getUnits(String category) async {
+    final uri = Uri.https(_url, '/$category');
+    final jsonResponse = await _getJson(uri);
+    if(jsonResponse == null || jsonResponse['units'] == null) {
+      print('Error retrieving units.');
+      return null;
+    }
+    return jsonResponse['units'];
+  }
+
+  // COMPLETED: Create convert()
   /// Given two units, converts from one to another.
   ///
   /// Returns a double, which is the converted amount. Returns null on error.
+
+  Future<double> convert(String category, String amount, String fromUnit, String toUnit) async {
+    final uri = Uri.https(_url, '/$category/convert',
+    {'amount': amount, 'from': fromUnit, 'to': toUnit});
+    final jsonResponse = await _getJson(uri);
+
+    if(jsonResponse != null || jsonResponse['status'] == 'error') {
+      print(jsonResponse['message']);
+      return null;
+    }
+
+    return jsonResponse['conversion'].toDouble();
+  }
+
+  Future<Map<String, dynamic>> _getJson(Uri uri) async {
+    try{
+      final httpRequest = await _httpClient.getUrl(uri);
+      final httpResponse = await httpRequest.close();
+
+      if(httpResponse.statusCode != HttpStatus.ok){
+        return null;
+      }
+
+      final responseBody = await httpResponse.transform(utf8.decoder).join();
+      return json.decode(responseBody);
+
+    } on Exception catch (e) {
+      print('$e');
+      return null;
+    }
+  }
+
+
 
 }
